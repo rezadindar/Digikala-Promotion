@@ -12,11 +12,11 @@ default_socket = socket.socket
 socks.set_default_proxy(socks.SOCKS5, SOCKS5_PROXY_HOST, SOCKS5_PROXY_PORT)
 socket.socket = socks.socksocket
 
-TOKEN="7490505749:AAHdsL4MQi9WEXMvIQfYdXXXXXXXXXXXX" 
-chatID="5240000000"
+TOKEN="7490505749:AAHdsL4MQi9WEXMvIQfYdXIABr2KeruYTwg" 
+chatID="5246624007"
 URL=f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 productID = 15526300
-checkPeriod = 1 # in minutes
+checkPeriod = 10 # in minutes
 
 def sendMessage(message):
     try:
@@ -33,15 +33,20 @@ while(True):
     if 'r' in locals():
         if r.status_code == 200:
             if r.json()['status'] == 200:
-                price = r.json()['data']['product']['default_variant']['price']
-                promotionPrice = price['selling_price']
-                orgPrice = price['rrp_price']
+                productStatus = r.json()['data']['product']['status']
+                if productStatus == 'marketable':
+                    price = r.json()['data']['product']['default_variant']['price']
+                    promotionPrice = price['selling_price']
+                    orgPrice = price['rrp_price']
 
-                if price['is_promotion']:
-                    promotionPercent = str(round(100 - promotionPrice / orgPrice * 100)) + '%'
-                    sendMessage(f"تخفیف خورد!!!! 😎\n\n🎉 درصد تخفیف: {promotionPercent}\n\n💰 قیمت اصلی: {format_currency(orgPrice, currency_code='IRR')}\n\n🧨 قیمت جدید: {format_currency(promotionPrice, currency_code='IRR')}")
-                else:
-                    sendMessage("فعلا خبری نیست!")
+                    if price['is_promotion']:
+                        promotionPercent = str(round(100 - promotionPrice / orgPrice * 100)) + '%'
+                        sendMessage(f"تخفیف خورد!!!! 😎\n\n🎉 درصد تخفیف: {promotionPercent}\n\n💰 قیمت اصلی: {format_currency(orgPrice, currency_code='IRR')}\n\n🧨 قیمت جدید: {format_currency(promotionPrice, currency_code='IRR')}")
+                    else:
+                        sendMessage("فعلا خبری نیست!")
+                elif productStatus == 'out_of_stock':
+                    sendMessage("شانس نداری! ناموجود شده! هر وقت موجود شد دوباره فعالم کن.")
+                    break
             else:
                 sendMessage("اوه! انگاری یه مشکلی هست که باس چکش کنی!")
         else:
